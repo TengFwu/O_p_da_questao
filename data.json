@@ -9,7 +9,7 @@
     "uso": "Indicado quando a variável dependente é numérica (quantitativa) e a variável independente é categórica com dois níveis (dois grupos distintos, ex: Placebo vs Tratamento).",
     "exemplo_pratico": "Comparar a eficácia de dois métodos de ensino diferentes: O Grupo A usa o Método Tradicional e o Grupo B usa o Método Inovador. O teste t verificará se a nota média final difere significativamente entre os dois grupos.",
     "hipoteses": {
-      "nula": "H0: Não há diferença real entre as médias das populações dos dois grupos (μ1 = μ2)",
+      "nula": "H0: Não há diferença real entre as médias dos dois grupos (μ1 = μ2)",
       "alternativa": "H1: Existe uma diferença real entre as médias dos dois grupos (μ1 ≠ μ2)."
     },
     "pressupostos": [
