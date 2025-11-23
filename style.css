@@ -1,0 +1,1052 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&display=swap'); /* Para os códigos */
+
+/* --- Variáveis e Reset --- */
+:root {
+    --bg-dark: #202124;
+    --bg-sidebar: #292a2d;
+    --bg-card: #303134;
+    --primary: #8ab4f8;
+    --primary-hover: #aecbfa;
+    --text-main: #e8eaed;
+    --text-muted: #9aa0a6;
+    --border: #3c4043;
+    --accent-success: #81c995;
+    --accent-warning: #fdd663;
+    --accent-danger: #f28b82;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: "Quicksand", sans-serif;
+    overflow: hidden; /* Impede scroll no body, o scroll é interno nas divisoes */
+}
+
+/* --- Layout SPA --- */
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#home-button {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--primary);
+    padding: 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+#home-button:hover {
+    background: var(--primary);
+    color: var(--bg-dark);
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 8px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    font-family: inherit;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.test-list-nav {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem 0;
+}
+
+#test-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.test-item {
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background 0.2s;
+    color: var(--text-muted);
+}
+
+.test-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.test-item.active {
+    background-color: rgba(138, 180, 248, 0.1);
+    border-left-color: var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* --- Área de Conteúdo --- */
+.content-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 3rem 4rem;
+    position: relative;
+}
+
+.hidden { display: none !important; }
+
+/* Animação suave */
+.fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilo da Home */
+.home-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    margin-top: 10vh;
+}
+
+.home-content h1 { color: var(--primary); font-size: 2.5rem; }
+.tips-box {
+    text-align: left;
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-top: 3rem;
+    border: 1px solid var(--border);
+}
+
+/* --- Detalhes do Teste (Documentação) --- */
+.detail-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.detail-header h1 {
+    color: var(--primary);
+    margin: 0;
+    font-size: 2.2rem;
+}
+
+.detail-header .description {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    margin-top: 0.5rem;
+}
+
+.section-title {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    border-left: 3px solid var(--primary);
+    padding-left: 0.8rem;
+}
+
+/* Cards de Hipóteses */
+.hypothesis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.h-card {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-top: 4px solid;
+}
+
+.h-card.h0 { border-color: var(--primary); }
+.h-card.h1 { border-color: var(--accent-danger); }
+
+.h-card h4 { margin-top: 0; color: var(--text-muted); font-size: 0.9rem; }
+.h-card p { font-size: 1.1rem; font-weight: 500; }
+
+/* Lista de Pressupostos */
+.check-list li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.check-list li::before {
+    content: "✓";
+    color: var(--accent-success);
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+/* Blocos de Código (Estilo Editor) */
+.code-block {
+    background: #1e1e1e; /* Fundo mais escuro para código */
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative; /* Necessário para posicionar o botão dentro */
+}
+
+.code-header {
+    background: #252526;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid #333;
+    font-weight: 600;
+}
+
+pre {
+    margin: 0;
+    padding: 1.5rem;
+    overflow-x: auto;
+}
+
+code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    color: #d4d4d4;
+    line-height: 1.5;
+}
+
+/* Footer do report */
+.report-box {
+    background: rgba(129, 201, 149, 0.1);
+    border: 1px solid var(--accent-success);
+    color: var(--accent-success);
+    padding: 1.5rem;
+    border-radius: 8px;
+    font-style: italic;
+}
+
+/* Scrollbar Personalizada */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .app-container { flex-direction: column; height: auto; overflow-y: auto;}
+    body { overflow: auto; }
+    .sidebar { width: 100%; height: auto; max-height: 40vh; }
+    .content-area { padding: 1.5rem; overflow: visible; }
+    .hypothesis-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Estilos do Fluxograma (Árvore de Decisão) --- */
+
+/* Container principal do fluxograma */
+#flowchart-container {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin: 2rem auto 0 auto; /* Centraliza e dá margem do topo */
+    max-width: 700px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+
+    /* Correção crítica para evitar colapso e centralizar conteúdo */
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* A Pergunta atual */
+.flow-question {
+    font-size: 1.4rem;
+    color: var(--text-main);
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+/* Container dos botões de opção */
+.flow-options {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+    margin-bottom: 2rem;
+}
+
+/* Botões de Opção (Sim, Não, 2 Grupos, etc.) */
+.btn-flow {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 0.8rem 1.6rem;
+    border-radius: 50px; /* Formato de pílula */
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-flow:hover {
+    background: var(--primary);
+    color: var(--bg-dark); /* Texto escuro no fundo claro */
+    transform: translateY(-2px); /* Leve subida ao passar o mouse */
+    box-shadow: 0 4px 12px rgba(138, 180, 248, 0.3);
+}
+
+/* Botão de Reiniciar (Link discreto) */
+.btn-reset {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: underline;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.btn-reset:hover {
+    opacity: 1;
+    color: var(--accent-danger); /* Fica vermelho ao passar o mouse */
+}
+
+/* --- Resultado Final do Fluxograma --- */
+
+.flow-result-box {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.flow-result-title {
+    color: var(--accent-success);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.flow-result-box h3 {
+    font-size: 1.8rem;
+    color: var(--text-main);
+    margin-top: 0;
+}
+
+/* Botão de Ação Principal (Ir para o Teste) */
+.btn-action {
+    background-color: var(--accent-success);
+    color: #202124; /* Texto escuro para contraste */
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.2s, filter 0.2s;
+    margin-top: 1rem;
+}
+
+.btn-action:hover {
+    filter: brightness(1.1);
+    transform: scale(1.05);
+}
+
+/* --- Barra de Configuração de Variáveis --- */
+.variable-settings {
+    background-color: #2b2c2f;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 150px;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+}
+
+.input-group input {
+    background: #1e1e1e;
+    border: 1px solid var(--border);
+    color: var(--accent-success); /* Cor de destaque para o texto digitado */
+    padding: 0.8rem;
+    border-radius: 6px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    transition: border 0.2s;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--accent-success);
+}
+
+/* --- Botão de Copiar Código --- */
+
+.copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Quicksand', sans-serif;
+}
+
+.copy-btn:hover {
+    background-color: var(--primary);
+    color: var(--bg-dark);
+}
+
+.copy-btn.copied {
+    background-color: var(--accent-success);
+    color: var(--bg-dark);
+    border-color: var(--accent-success);
+}
+
+/* --- Visualização da Estrutura de Dados --- */
+.data-format-container {
+    background-color: #2b2c2f;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-warning); /* Amarelo para atenção */
+    margin-bottom: 2rem;
+}
+
+.data-preview-table {
+    width: 100%;
+    max-width: 500px; /* Não precisa ser gigante */
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    background: #1e1e1e;
+    border-radius: 6px;
+    overflow: hidden; /* Para arredondar cantos da tabela */
+}
+
+.data-preview-table th {
+    background-color: #3c4043;
+    color: var(--primary);
+    padding: 0.6rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+}
+
+.data-preview-table td {
+    padding: 0.6rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid #333;
+}
+
+.data-preview-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Destaque para coluna de ID (opcional, visualmente mais fraca) */
+.data-preview-table th:first-child,
+.data-preview-table td:first-child {
+    color: #666; 
+    width: 50px;
+}
+
+/* --- Destaques na Tabela Dinâmica --- */
+.highlight-var {
+    color: var(--accent-success) !important;
+    border-bottom: 2px solid var(--accent-success) !important;
+}
+
+.highlight-group {
+    color: var(--primary) !important;
+    border-bottom: 2px solid var(--primary) !important;
+}
+
+/* --- Caixa de Ajuda Pivotagem --- */
+.pivot-helper-box {
+    margin-top: 1.5rem;
+    background-color: rgba(242, 139, 130, 0.1); /* Fundo avermelhado bem leve */
+    border: 1px dashed var(--accent-danger);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.pivot-helper-box h4 {
+    color: var(--accent-danger);
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pivot-helper-box p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+/* Ajuste no bloco de código dentro do helper para ser menorzinho */
+.pivot-helper-box .code-block {
+    margin-bottom: 0;
+    border-color: rgba(242, 139, 130, 0.3);
+}
+
+.pivot-helper-box pre {
+    padding: 1rem;
+    font-size: 0.85rem;
+}
+
+/* --- Assistente de Importação --- */
+.import-guide-box {
+    background-color: #252629;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.import-header {
+    padding: 1rem 1.5rem;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border);
+}
+
+.import-header h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--primary);
+}
+
+.import-tabs {
+    display: flex;
+    background-color: #1e1e1e;
+    border-bottom: 1px solid var(--border);
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 1rem;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: var(--text-main);
+}
+
+.tab-btn.active {
+    color: var(--accent-success); /* Verde para destacar */
+    border-bottom-color: var(--accent-success);
+    background-color: rgba(129, 201, 149, 0.05);
+}
+
+.import-code-area {
+    padding: 0; /* O padding já vem do code-block interno */
+}
+
+/* Ajuste fino para remover bordas duplicadas */
+.import-code-area .code-block {
+    border: none;
+    border-radius: 0;
+    margin-bottom: 0;
+}
+
+/* --- Tooltips para Ajuda nas Variáveis --- */
+.input-label-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+}
+
+.help-icon {
+    background: var(--border);
+    color: var(--text-muted);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    cursor: help;
+    position: relative;
+}
+
+/* O texto do tooltip */
+.help-icon:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #fff;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    white-space: pre-wrap; /* Permite quebra de linha */
+    width: max-content;
+    max-width: 200px;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    pointer-events: none;
+}
+
+/* --- Comparação Visual (Pivotagem) --- */
+.comparison-container {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.comparison-box {
+    flex: 1;
+    min-width: 200px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.arrow-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--accent-warning);
+    padding-top: 2rem;
+}
+
+.mini-table {
+    width: 100%;
+    font-size: 0.75rem;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    background: var(--bg-card);
+}
+
+.mini-table th, .mini-table td {
+    border: 1px solid var(--border);
+    padding: 4px;
+    text-align: center;
+}
+
+.mini-table th { background: #252629; color: var(--text-muted); }
+.highlight-col { background: rgba(253, 214, 99, 0.1); color: var(--accent-warning); }
+
+/* Ajuste Mobile */
+@media (max-width: 768px) {
+    .arrow-divider { transform: rotate(90deg); padding: 0.5rem; }
+}
+
+/* --- Tabela Editável e Accordion --- */
+.accordion-wrapper {
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.accordion-header {
+    background: #252629;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.accordion-header:hover { background: #303134; }
+
+.accordion-header.active { 
+    background: var(--bg-card); 
+    border-bottom-color: var(--border);
+    color: var(--primary);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+    background: #1e1e1e;
+}
+
+.accordion-content.open { max-height: 1200px; } /* Altura suficiente para conteúdo */
+
+/* Mantendo a animação da seta */
+.arrow-icon {
+    transition: transform 0.3s;
+}
+.accordion-header.active .arrow-icon {
+    transform: rotate(180deg);
+}
+
+.simulator-container {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Tabela Visual com Inputs */
+.editable-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+}
+
+.editable-table th {
+    background: #333;
+    padding: 0;
+    border: 1px solid var(--border);
+}
+
+.editable-table td {
+    padding: 0.8rem;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* O Input dentro do TH parece texto normal mas é editável */
+.header-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--accent-warning);
+    font-weight: bold;
+    padding: 0.8rem;
+    text-align: center;
+    font-family: inherit;
+    cursor: text;
+    transition: background 0.2s;
+}
+
+.header-input:focus {
+    background: rgba(255,255,255,0.05);
+    outline: none;
+    color: var(--accent-success);
+}
+
+/* --- Área de Seleção de Variáveis (Botões) --- */
+.var-selection-area {
+    background: #2b2c2f;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+}
+
+.var-selector-group {
+    margin-bottom: 1.5rem;
+}
+
+.var-selector-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+}
+
+.chips-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-height: 40px; /* Para não sumir se vazio */
+    padding: 0.5rem;
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+    border: 1px dashed var(--border);
+}
+
+.var-chip {
+    background: #3c4043;
+    color: var(--text-main);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.var-chip:hover {
+    background: var(--text-muted);
+    color: #000;
+}
+
+.var-chip.selected {
+    background: var(--accent-success);
+    color: #000;
+    border-color: var(--accent-success);
+    font-weight: bold;
+    box-shadow: 0 0 8px rgba(129, 201, 149, 0.4);
+}
+
+/* Toggle Switch para Modo Pivot */
+.pivot-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(242, 139, 130, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px dashed var(--accent-danger);
+}
+
+/* --- NOVA UI: Blocos de Código estilo Terminal (Mac/Linux) --- */
+.code-block {
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    position: relative;
+    font-family: 'Fira Code', monospace;
+}
+
+.code-header {
+    background: #2d2d2d;
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Espaço entre título e botões */
+}
+
+/* Bolinhas do terminal */
+.code-header::before {
+    content: "● ● ●";
+    color: #5f6368; 
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    /* Hack visual para cores: */
+    background: linear-gradient(to right, #ff5f56 33%, #ffbd2e 33%, #ffbd2e 66%, #27c93f 66%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-right: 10px;
+}
+
+/* --- CONTAINER DOS GRÁFICOS (Fundo Profissional) --- */
+.concept-chart {
+    width: 100%;
+    height: 140px; /* Um pouco mais alto */
+    background-color: #252629;
+    /* Padrão de Grid Sutil (Papel Milimetrado Dark) */
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Estilos para os elementos SVG internos */
+.concept-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Animação de entrada suave */
+.concept-svg path, .concept-svg circle, .concept-svg rect {
+    animation: draw 1s ease-out forwards;
+}
+
+@keyframes draw {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- UPDATE: Termômetro de P-Valor (Mais Limpo) --- */
+.p-value-gauge-container {
+    background: #202124;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.gauge-track {
+    height: 8px;
+    width: 100%;
+    background: #333;
+    border-radius: 4px;
+    position: relative;
+    margin: 2.5rem 0 1.5rem 0;
+}
+
+/* Faixa Colorida (Significância) */
+.gauge-success-zone {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 5%; /* Representa o 0.05 */
+    background: var(--accent-success);
+    border-radius: 4px 0 0 4px;
+    box-shadow: 0 0 10px rgba(129, 201, 149, 0.4);
+}
+
+.gauge-marker-text {
+    position: absolute;
+    top: -25px;
+    left: 5%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--accent-success);
+    font-weight: bold;
+}
+
+.gauge-marker-line {
+    position: absolute;
+    top: -5px;
+    bottom: -5px;
+    left: 5%;
+    width: 2px;
+    background: var(--accent-success);
+    z-index: 1;
+}
+
+.gauge-needle-new {
+    position: absolute;
+    top: -6px;
+    width: 4px;
+    height: 20px;
+    background: #fff;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    box-shadow: 0 0 8px rgba(255,255,255,0.8);
+    transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 2;
+}
+
+.gauge-needle-new::after {
+    content: "Seu P";
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    color: #fff;
+    white-space: nowrap;
+}
+/* Rodapé da Sidebar */
+.sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.2);
+}
+
+.sidebar-footer p {
+    margin: 0 0 0.5rem 0;
+}
+
+.sidebar-footer strong {
+    color: var(--text-main);
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.social-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <!-- Ícone na aba (opcional) -->
+    <title>O p da questão</title>
+</head>
+<body>
+    <div class="app-container">
+        <!-- BARRA LATERAL (Navegação) -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <button id="home-button" title="Voltar para o início">
+                    🏠 Página Inicial
+                </button>
+                <div class="search-box">
+                    <input type="text" id="filter-input" placeholder="Buscar teste...">
+                </div>
+            </header>
+            
+            <nav class="test-list-nav">
+                <ul id="test-list">
+                    <!-- A lista de testes será injetada aqui pelo JavaScript -->
+                </ul>
+            </nav>
+            <footer class="sidebar-footer">
+    <p>Criado por <strong>Teng Fwu Shing</strong></p>
+    <div class="social-links">
+        <a href="http://lattes.cnpq.br/6506580608585044" target="_blank" title="Lattes">🎓 Lattes</a>
+        <a href="https://github.com/TengFwu" target="_blank" title="GitHub">💻 GitHub</a>
+    </div>
+</footer>
+        </aside>
+
+        <!-- ÁREA DE CONTEÚDO (Principal) -->
+        <main class="content-area">
+            
+            <!-- Visão: Home -->
+            <div id="home-view" class="fade-in">
+                <div class="home-content">
+                    <h1>O <i>p</i> da questão</h1>
+                    <p class="subtitle">Selecione um teste estatístico na barra lateral ou use o guia abaixo:</p>
+                    
+                    <!-- Container limpo para evitar bugs de espaçamento -->
+                    <div id="flowchart-container" class="flow-container"></div>
+
+                    <div class="tips-box">
+                        <h3>💡 Como usar este Dashboard:</h3>
+                        <ul>
+                            <li>Use a busca na lateral para filtrar testes rapidamente.</li>
+                            <li>Analise as Hipóteses Nula (H0) e Alternativa (H1).</li>
+                            <li>Copie os códigos R prontos para uso.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visão: Detalhes do Teste (Inicia oculto) -->
+            <div id="test-detail-view" class="hidden fade-in">
+                <!-- O conteúdo detalhado será injetado aqui pelo JavaScript -->
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

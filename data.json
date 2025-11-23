@@ -1,0 +1,1030 @@
+[
+  {
+    "titulo": "Teste t de Student para Amostras Independentes (Não Pareado)",
+    "pivot_config": {
+      "allowed": true,
+      "default_cols": 2
+    },
+    "descricao": "É um teste estatístico paramétrico inferencial utilizado para determinar se existe uma diferença estatisticamente significativa entre as médias de dois grupos que não têm relação entre si (grupos não vinculados). Ele compara a variabilidade entre os grupos com a variabilidade dentro dos grupos.",
+    "uso": "Indicado quando a variável dependente é numérica (quantitativa) e a variável independente é categórica com dois níveis (dois grupos distintos, ex: Placebo vs Tratamento).",
+    "exemplo_pratico": "Comparar a eficácia de dois métodos de ensino diferentes: O Grupo A usa o Método Tradicional e o Grupo B usa o Método Inovador. O teste t verificará se a nota média final difere significativamente entre os dois grupos.",
+    "hipoteses": {
+      "nula": "H0: Não há diferença real entre as médias das populações dos dois grupos (μ1 = μ2). Qualquer diferença observada na amostra é fruto do acaso.",
+      "alternativa": "H1: Existe uma diferença real entre as médias das populações dos dois grupos (μ1 ≠ μ2)."
+    },
+    "pressupostos": [
+      {
+        "nome": "Independência",
+        "descricao": "Um participante não pode pertencer aos dois grupos simultaneamente.",
+        "violacao": "Revise o desenho experimental (considere Pareado).",
+        "icone": "🎲"
+      },
+      {
+        "nome": "Normalidade",
+        "descricao": "A variável deve seguir distribuição normal em cada grupo (Shapiro-Wilk).",
+        "violacao": "Se falhar: Use Mann-Whitney U.",
+        "icone": "🔔"
+      },
+      {
+        "nome": "Homocedasticidade",
+        "descricao": "As variâncias dos dois grupos devem ser similares (Levene).",
+        "violacao": "Se falhar: Use Welch T-test (ajustado no R).",
+        "icone": "⚖️"
+      },
+      {
+        "nome": "Ausência de Outliers",
+        "descricao": "Não devem existir valores extremos que distorçam a média.",
+        "violacao": "Investigue, remova ou use testes robustos.",
+        "icone": "🚫"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Longo (Tidy Format)",
+      "descricao": "Uma coluna numérica 'y' e uma coluna de grupo 'g'.",
+      "colunas": [
+        "ID",
+        "g",
+        "y"
+      ],
+      "exemplo": [
+        ["1", "Controle", "12.5"],
+        ["2", "Controle", "11.8"],
+        ["3", "Tratamento", "15.2"],
+        ["4", "Tratamento", "16.1"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(dplyr)) install.packages('dplyr')\nif(!require(rstatix)) install.packages('rstatix')\nif(!require(ggpubr)) install.packages('ggpubr')\nlibrary(dplyr); library(rstatix); library(ggpubr)\n\n# Variáveis do Dataset:\n# Variável Dependente (numérica): {{y}}\n# Variável Independente (grupo): {{x}}"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Resumo estatístico detalhado por grupo\n{{df}} %>%\n  group_by({{x}}) %>%\n  get_summary_stats({{y}}, type = 'mean_sd')"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# A) Normalidade (Shapiro-Wilk por grupo)\n# H0: Dados são normais vs H1: Dados não são normais (p < 0.05)\n{{df}} %>%\n  group_by({{x}}) %>%\n  shapiro_test({{y}})\n\n# B) Homogeneidade de Variâncias (Levene)\n# H0: Variâncias são iguais vs H1: Variâncias diferem\n{{df}} %>% levene_test({{y}} ~ {{x}})"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Teste t (com correção de Welch se variâncias desiguais)\n# var.equal = FALSE é mais seguro e padrão moderno\nres_teste <- {{df}} %>% \n  t_test({{y}} ~ {{x}}, var.equal = FALSE, detailed = TRUE)\n\n# Tamanho de Efeito (Cohen's d)\n# Mede a magnitude da diferença (0.2=pequeno, 0.5=médio, 0.8=grande)\nres_eff <- {{df}} %>% \n  cohens_d({{y}} ~ {{x}}, var.equal = FALSE)\n\nprint(res_teste)\nprint(res_eff)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Gráfico de Boxplot com anotação estatística\nggplot({{df}}, aes(x = {{x}}, y = {{y}}, fill = {{x}})) + \n  # Adiciona a geometria de Boxplot (caixa com medianas e quartis)\n  geom_boxplot(alpha = 0.7, outlier.shape = NA) + \n  \n  # Adiciona os pontos individuais (jitter) para mostrar a distribuição real\n  geom_jitter(width = 0.2, alpha = 0.5, color = 'black') + \n  \n  # Define cores manuais para os grupos (opcional, mas estético)\n  scale_fill_manual(values = c('#00AFBB', '#E7B800')) + \n  \n  # Adiciona etiquetas (títulos e eixos)\n  labs(\n    title = 'Comparação de Médias entre Grupos',\n    subtitle = 'Teste t de Student (Amostras Independentes)',\n    x = 'Grupo Experimental',\n    y = 'Variável Resposta'\n  ) + \n  \n  # Define um tema limpo e minimalista (sem fundo cinza)\n  theme_classic() + \n  \n  # Remove a legenda lateral (redundante pois o eixo X já identifica)\n  theme(legend.position = 'none')"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "t = -2.45, df = 18, p-value = 0.0245",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "Valor principal! Se < 0.05, indica que os grupos são estatisticamente diferentes."
+        },
+        {
+          "termo": "t",
+          "significado": "Estatística t. Quanto mais longe de zero (positivo ou negativo), maior a diferença relativa ao erro."
+        }
+      ]
+    },
+    "graficos": "Boxplot ou Violin Plot com jitter (pontos)",
+    "report": "Foi conduzido um teste t de Student para amostras independentes para comparar [Variável] entre [Grupo A] e [Grupo B]. Houve uma diferença significativa nos escores entre o Grupo A (M = [Média], DP = [Desvio]) e o Grupo B (M = [Média], DP = [Desvio]); t([graus_liberdade]) = [valor_t], p = [valor_p]. A magnitude das diferenças nas médias (diferença média = [valor], IC 95%: [inf] a [sup]) foi [Pequena/Média/Grande] (d de Cohen = [valor_d]).",
+    "tags": [
+      "comparação de médias",
+      "paramétrico",
+      "dois grupos",
+      "inferência"
+    ]
+  },
+  {
+    "titulo": "ANOVA de uma via (One-Way ANOVA)",
+    "pivot_config": {
+      "allowed": true,
+      "default_cols": 3
+    },
+    "descricao": "É um teste estatístico paramétrico utilizado para comparar as médias de três ou mais grupos independentes simultaneamente. A ANOVA testa se a variância *entre* os grupos é maior do que a variância *dentro* dos grupos (Razão F).",
+    "uso": "Indicado quando você possui uma variável numérica e uma variável categórica com 3 ou mais níveis. É crucial para evitar o aumento do erro tipo I que ocorreria ao realizar múltiplos testes t separados.",
+    "exemplo_pratico": "Comparar a eficácia de três dietas diferentes (Dieta A, Dieta B, Dieta C) na perda de peso após 3 meses.",
+    "hipoteses": {
+      "nula": "H0: Todas as médias populacionais dos grupos são estatisticamente iguais (μ1 = μ2 = μ3 = ... = μk).",
+      "alternativa": "H1: Pelo menos uma das médias difere das demais. Atenção: O teste global não diz *qual* grupo é diferente, apenas que *existe* uma diferença."
+    },
+    "pressupostos": [
+      {
+        "nome": "Independência",
+        "descricao": "As amostras devem ser aleatórias e independentes entre si.",
+        "violacao": "Considere ANOVA de Medidas Repetidas se houver dependência.",
+        "icone": "🎲"
+      },
+      {
+        "nome": "Normalidade dos Resíduos",
+        "descricao": "Os erros do modelo devem seguir distribuição normal (Shapiro-Wilk).",
+        "violacao": "Se falhar: Use Kruskal-Wallis.",
+        "icone": "🔔"
+      },
+      {
+        "nome": "Homocedasticidade",
+        "descricao": "A variabilidade deve ser similar em todos os grupos (Levene).",
+        "violacao": "Se falhar: Use Welch ANOVA (oneway.test).",
+        "icone": "⚖️"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Longo (Tidy Format)",
+      "descricao": "Uma coluna numérica 'y' e uma coluna de grupo 'grupo'.",
+      "colunas": [
+        "ID",
+        "grupo",
+        "y"
+      ],
+      "exemplo": [
+        ["1", "Controle", "12.5"],
+        ["2", "Controle", "11.8"],
+        ["3", "TratamentoA", "15.2"],
+        ["4", "TratamentoB", "16.1"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(dplyr)) install.packages('dplyr')\n if(!require(Hmisc)) install.packages('Hmisc')\n if(!require(rstatix)) install.packages('rstatix')\nif(!require(ggpubr)) install.packages('ggpubr')\nlibrary(dplyr); library(rstatix); library(ggpubr); library(Hmisc)\n\n# Dataset deve estar no formato longo\n# Variável Dependente (numérica): {{y}}\n# Variável Independente (fator > 2 níveis): {{x}}"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Resumo descritivo por grupo (Média, Desvio Padrão, Erro Padrão)\n{{df}} %>%\n  group_by({{x}}) %>%\n  get_summary_stats({{y}}, type = 'mean_sd')"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# Ajuste prévio do modelo para análise de resíduos\nmodelo <- aov({{y}} ~ {{x}}, data = {{df}})\n\n# A) Normalidade dos resíduos (Shapiro-Wilk)\n# H0: Resíduos são normais (desejado)\nshapiro_test(residuals(modelo))\n\n# B) Homogeneidade de Variâncias (Levene)\n# H0: Variâncias iguais (desejado)\nlevene_test({{df}}, {{y}} ~ {{x}})"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Tabela da ANOVA\n# effect.size = 'ges' (Generalized Eta Squared)\nanova_res <- anova_test({{df}}, {{y}} ~ {{x}}, effect.size = 'ges')\n\n# Post-Hoc (Tukey) para identificar diferenças par a par\n# Executado apenas se ANOVA p < 0.05\ntukey_res <- tukey_hsd({{df}}, {{y}} ~ {{x}})\n\nprint(anova_res)\nprint(tukey_res)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Gráfico de médias com Intervalo de Confiança (95%)\nggplot({{df}}, aes(x = {{x}}, y = {{y}}, color = {{x}})) + \n  # Adiciona pontos (jitter) transparentes ao fundo\n  geom_jitter(position = position_jitter(0.2), alpha = 0.3) + \n  \n  # Adiciona a média e erro padrão (ou IC)\n  stat_summary(fun.data = mean_cl_boot, geom = 'errorbar', width = 0.2, size = 1) + \n  stat_summary(fun = mean, geom = 'point', size = 3) + \n  \n  # Títulos e Rótulos\n  labs(\n    title = 'ANOVA One-Way',\n    subtitle = 'Média e Intervalo de Confiança (95%)',\n    y = 'Variável Dependente',\n    x = 'Grupos'\n  ) + \n  \n  theme_bw() + \n  theme(legend.position = 'none')"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "F = 4.32, df1 = 2, df2 = 27, p-value = 0.023",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "Se < 0.05, indica que pelo menos um grupo é estatisticamente diferente dos outros (mas não diz qual)."
+        },
+        {
+          "termo": "F",
+          "significado": "Razão F. Indica o quanto a variância ENTRE os grupos supera a variância DENTRO dos grupos."
+        }
+      ]
+    },
+    "graficos": "Boxplot, Violin Plot ou Gráfico de Barras com erro padrão",
+    "report": "Uma ANOVA de uma via foi realizada para comparar o efeito de [Variável Independente] em [Variável Dependente]. A análise revelou um efeito estatisticamente significativo de [Fator] em [Variável], F([df1], [df2]) = [valor_F], p = [valor_p], η² = [valor_eta]. O teste post-hoc de Tukey indicou que as médias do [Grupo A] (M = [valor], DP = [valor]) diferiram significativamente do [Grupo B] (M = [valor], DP = [valor]), p < .05.",
+    "tags": [
+      "comparação de médias",
+      "muitos grupos",
+      "paramétrico",
+      "variância"
+    ]
+  },
+  {
+    "titulo": "Teste Qui-Quadrado de Independência (Chi-Square Test)",
+    "pivot_config": {
+      "allowed": false,
+      "default_cols": 0
+    },
+    "descricao": "É um teste estatístico não-paramétrico utilizado para verificar se existe uma associação significativa (dependência) entre duas variáveis categóricas (qualitativas). Ele compara as frequências observadas na amostra com as frequências que seriam esperadas se não houvesse relação entre as variáveis.",
+    "uso": "Indicado quando você possui duas variáveis nominais ou ordinais e quer saber se uma influencia a distribuição da outra. O teste analisa tabelas de contingência (cruzamento de dados).",
+    "exemplo_pratico": "Verificar se existe associação entre 'Hábito de Fumar' (Sim/Não) e 'Diagnóstico de Câncer' (Positivo/Negativo).",
+    "hipoteses": {
+      "nula": "H0: As variáveis são independentes (não há associação). A distribuição das frequências em uma variável não é afetada pela outra.",
+      "alternativa": "H1: As variáveis são dependentes (existe associação). A frequência de uma categoria varia em função da outra variável."
+    },
+    "pressupostos": [
+      {
+        "nome": "Variáveis Categóricas",
+        "descricao": "Ambas as variáveis devem ser nominais ou ordinais.",
+        "violacao": "Se forem numéricas, considere Correlação ou Teste T.",
+        "icone": "📊"
+      },
+      {
+        "nome": "Independência das observações",
+        "descricao": "Cada sujeito conta apenas em uma célula (não pode haver medidas repetidas).",
+        "violacao": "Se for pareado/repetido, use Teste de McNemar.",
+        "icone": "🎲"
+      },
+      {
+        "nome": "Frequência Esperada > 5",
+        "descricao": "80% das células devem ter valor esperado >= 5. Nenhuma célula com zero.",
+        "violacao": "Se falhar: Use Teste Exato de Fisher.",
+        "icone": "🔢"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Dados Brutos",
+      "descricao": "Duas colunas categóricas: 'var1' e 'var2'.",
+      "colunas": [
+        "ID",
+        "var1",
+        "var2"
+      ],
+      "exemplo": [
+        ["1", "Masculino", "Sim"],
+        ["2", "Feminino", "Não"],
+        ["3", "Masculino", "Não"],
+        ["4", "Feminino", "Sim"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(rstatix)) install.packages('rstatix')\nif(!require(ggplot2)) install.packages('ggplot2')\nlibrary(rstatix); library(ggplot2)\n\n# Variáveis devem ser categóricas (Fatores)\n# Variável Linha: {{x}}\n# Variável Coluna: {{y}}"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Tabela de Contingência (Frequências Absolutas)\ntabela <- table({{df}}${{x}}, {{df}}${{y}})\nprint('Tabela de Frequências:')\nprint(tabela)\n\n# Porcentagens na linha (para entender a distribuição)\nprint('Porcentagens por Linha (%):')\nprop.table(tabela, margin = 1) * 100"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# Verifica frequências esperadas mínimas\n# O teste chi-quadrado é inválido se >20% das células tiverem valor esperado < 5\nteste_chi <- chisq_test({{df}}${{x}}, {{df}}${{y}})\n\nprint('Contagem de células esperadas:')\nprint(teste_chi$expected)\n# Regra: Se muitos valores < 5, considerar fisher_test({{df}}${{x}}, {{df}}${{y}})"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Executa o teste Qui-Quadrado de Independência\nres_chi <- chisq_test({{df}}${{x}}, {{df}}${{y}})\n\n# Calcula tamanho de efeito (V de Cramer)\n# Interpretação: 0.1=Pequeno, 0.3=Médio, 0.5=Grande\nres_cramer <- cramer_v({{df}}${{x}}, {{df}}${{y}})\n\nprint(res_chi)\nprint(res_cramer)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Gráfico de Barras Empilhadas (Normalizado 100%)\n# Ideal para comparar proporções entre grupos\nggplot({{df}}, aes(x = {{x}}, fill = {{y}})) + \n  # Cria barras empilhadas normalizadas para 100% ('fill')\n  geom_bar(position = 'fill', width = 0.7) + \n  \n  # Adiciona rótulos aos eixos\n  labs(\n    title = 'Associação entre Variáveis Categóricas',\n    subtitle = 'Distribuição Proporcional',\n    y = 'Proporção',\n    x = 'Categoria 1'\n  ) + \n  \n  # Ajusta escala de cores (viridis é amigável para daltônicos)\n  scale_fill_viridis_d() + \n  \n  theme_minimal()"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "X-squared = 12.5, df = 4, p-value = 0.0139",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "Se < 0.05, indica que existe uma associação significativa (dependência) entre as variáveis."
+        },
+        {
+          "termo": "X-squared",
+          "significado": "Estatística Qui-quadrado. Quanto maior, maior o desvio entre o observado e o esperado."
+        }
+      ]
+    },
+    "graficos": "Gráfico de Mosaico ou Barras Empilhadas",
+    "report": "Foi realizado um teste Qui-Quadrado de Independência para examinar a relação entre [Variável 1] e [Variável 2]. A relação entre essas variáveis foi estatisticamente significativa, X²([graus_liberdade], N = [tamanho_amostra]) = [valor_chi], p = [valor_p]. A força da associação foi [Pequena/Média/Grande], V de Cramer = [valor_V]. [Descrever qual categoria teve maior proporção].",
+    "tags": [
+      "frequência",
+      "categórico",
+      "associação",
+      "não-paramétrico"
+    ]
+  },
+  {
+    "titulo": "Regressão Linear Simples",
+    "pivot_config": {
+      "allowed": false,
+      "default_cols": 0
+    },
+    "descricao": "É uma técnica estatística utilizada para modelar e analisar a relação entre uma única variável independente (preditora, X) e uma variável dependente (resposta, Y). O objetivo é encontrar a 'reta de melhor ajuste' que minimiza o erro entre os valores observados e os previstos.",
+    "uso": "Utilizado para previsão e explicação. Permite estimar o valor de Y para um novo valor de X e quantificar quanto Y muda, em média, quando X aumenta em uma unidade.",
+    "exemplo_pratico": "Prever o peso de uma pessoa (Y) com base na sua altura (X).",
+    "hipoteses": {
+      "nula": "H0: β1 = 0. Não existe relação linear entre as variáveis. A inclinação da reta é zero (linha horizontal), indicando que X não ajuda a prever Y.",
+      "alternativa": "H1: β1 ≠ 0. Existe uma relação linear significativa. A variável X exerce influência sobre Y."
+    },
+    "pressupostos": [
+      {
+        "nome": "Linearidade",
+        "descricao": "A relação entre X e Y deve ser linear.",
+        "violacao": "Tente transformação não-linear ou Regressão Polinomial.",
+        "icone": "📏"
+      },
+      {
+        "nome": "Independência dos Resíduos",
+        "descricao": "O valor de uma observação não deve influenciar o outra. Em dados transversais (ex: pacientes diferentes), isso é garantido pela amostragem aleatória.",
+        "violacao": "Se houver dependência (ex: medidas repetidas), use Modelos Mistos.",
+        "icone": "🎲"
+      },
+      {
+        "nome": "Normalidade dos Resíduos",
+        "descricao": "Os erros devem seguir curva normal.",
+        "violacao": "Considere Bootstrapping ou GLM.",
+        "icone": "🔔"
+      },
+      {
+        "nome": "Homocedasticidade",
+        "descricao": "Variância dos erros deve ser constante.",
+        "violacao": "Use Regressão Robusta ou transforme Y.",
+        "icone": "⚖️"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Colunas Numéricas",
+      "descricao": "Coluna independente 'x' e dependente 'y'.",
+      "colunas": [
+        "ID",
+        "x",
+        "y"
+      ],
+      "exemplo": [
+        ["1", "45", "120"],
+        ["2", "60", "145"],
+        ["3", "35", "110"],
+        ["4", "55", "138"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(ggpubr)) install.packages('ggpubr')\nif(!require(performance)) install.packages('performance')\nif(!require(see)) install.packages('see')\nlibrary(ggpubr); library(performance); library(see)\n\n# Ambas variáveis devem ser contínuas\n# Variável Dependente (Y): {{y}}\n# Variável Preditora (X): {{x}}"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Resumo numérico das variáveis\nsummary({{df}}[c('{{x}}', '{{y}}')])\n\n# Correlação de Pearson para sondagem inicial\ncor({{df}}${{x}}, {{df}}${{y}}, use = 'complete.obs')"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# Ajusta o modelo para diagnósticos\nmodelo <- lm({{y}} ~ {{x}}, data = {{df}})\n\n# Diagnóstico visual completo (pacote 'performance')\n# Verifica: Linearidade, Homocedasticidade, Normalidade dos Resíduos, Outliers\ncheck_model(modelo)"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Resumo completo do modelo (Coeficientes, R², p-valor)\nsummary(modelo)\n\n# Intervalos de Confiança (95%) para os coeficientes\nconfint(modelo)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Gráfico de Dispersão com Reta de Regressão\nggplot({{df}}, aes(x = {{x}}, y = {{y}})) + \n  # Plota os pontos observados\n  geom_point(color = 'darkblue', alpha = 0.6, size = 2) + \n  \n  # Adiciona a linha de regressão ('lm') com intervalo de confiança (se = TRUE)\n  geom_smooth(method = 'lm', color = 'red', fill = 'red', alpha = 0.1, se = TRUE) + \n  \n  # Adiciona a equação da reta e R² no gráfico\n  stat_cor(label.x.npc = 'left', label.y.npc = 'top') + \n  \n  # Rótulos\n  labs(\n    title = 'Regressão Linear Simples',\n    subtitle = 'Relação Linear e Ajuste',\n    x = 'Variável Preditora (X)',\n    y = 'Variável Resposta (Y)'\n  ) + \n  \n  theme_light()"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "Multiple R-squared: 0.5032, F-statistic: 28.5, p-value: 1.2e-05",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "Se < 0.05, o modelo prevê a variável resposta significativamente melhor que o acaso."
+        },
+        {
+          "termo": "Multiple R-squared",
+          "significado": "R² (Coeficiente de Determinação). Explica X% da variação. Ex: 0.50 significa que o modelo explica 50% dos dados."
+        }
+      ]
+    },
+    "graficos": "Scatterplot com linha de regressão",
+    "report": "Foi calculada uma regressão linear simples para prever [Variável Y] com base em [Variável X]. Uma equação de regressão significativa foi encontrada (F([df1], [df2]) = [valor_F], p < .001), com um R² de [valor]. A previsão de Y é igual a [intercepto] + [beta]*X. Assim, [Variável Y] aumenta [beta] unidades para cada unidade de aumento em [Variável X].",
+    "tags": [
+      "predição",
+      "modelagem",
+      "linear",
+      "contínuo"
+    ]
+  },
+  {
+    "titulo": "Teste de Normalidade de Shapiro-Wilk",
+    "pivot_config": {
+      "allowed": false,
+      "default_cols": 0
+    },
+    "descricao": "É um teste estatístico de aderência (bondade de ajuste) utilizado para verificar se uma variável contínua segue uma distribuição normal (Gaussiana). É considerado o teste mais poderoso e robusto para verificar normalidade em amostras de tamanho pequeno a médio.",
+    "uso": "É o passo fundamental de triagem. O resultado define o caminho da análise: se os dados forem normais, seguimos para Estatística Paramétrica (ex: Teste t, ANOVA). Se não forem normais, seguimos para Estatística Não-Paramétrica (ex: Mann-Whitney, Kruskal-Wallis).",
+    "exemplo_pratico": "Verificar se a distribuição das idades dos pacientes em um estudo segue uma curva normal antes de aplicar um teste t.",
+    "hipoteses": {
+      "nula": "H0: A distribuição dos dados É NORMAL. A amostra não difere significativamente de uma curva normal teórica.",
+      "alternativa": "H1: A distribuição dos dados NÃO É NORMAL. A amostra desvia significativamente da normalidade."
+    },
+    "pressupostos": [
+      {
+        "nome": "Variável Contínua",
+        "descricao": "A variável deve ser numérica.",
+        "violacao": "N/A",
+        "icone": "🔢"
+      },
+      {
+        "nome": "Tamanho da Amostra",
+        "descricao": "Mais preciso para N < 5000.",
+        "violacao": "Para N > 5000, o teste é muito sensível. Use QQ-Plot ou Histograma.",
+        "icone": "📉"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Coluna Numérica",
+      "descricao": "Uma coluna numérica 'y'.",
+      "colunas": [
+        "ID",
+        "y"
+      ],
+      "exemplo": [
+        ["1", "12.5"],
+        ["2", "11.8"],
+        ["3", "15.2"],
+        ["4", "16.1"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(dplyr)) install.packages('dplyr')\nif(!require(rstatix)) install.packages('rstatix')\nif(!require(ggpubr)) install.packages('ggpubr')\nlibrary(dplyr); library(rstatix); library(ggpubr)\n\n# Variável de interesse (numérica): {{y}}"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Medidas de tendência central e dispersão\n{{df}} %>%\n  get_summary_stats({{y}}, type = 'common')"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# Verificação de tamanho amostral (apenas informativo)\nif(nrow({{df}}) > 5000) {\n  print('Atenção: N > 5000. Shapiro-Wilk é muito sensível. Confie mais no QQ-Plot.')\n}"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Execução do teste de Shapiro-Wilk\n# H0: Normal | H1: Não-Normal\nres_shapiro <- shapiro_test({{df}}${{y}})\n\nprint(res_shapiro)\n# Interpretação:\n# Se p > 0.05: Assume-se Normalidade\n# Se p < 0.05: Rejeita-se Normalidade"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Histograma com curva de densidade e QQ-Plot lado a lado\np1 <- gghistogram({{df}}, x = '{{y}}', \n            add = 'mean', rug = TRUE, \n            fill = 'lightblue', color = 'black', bins = 15) + \n            geom_density(alpha = 0.2, fill = 'red')\n\np2 <- ggqqplot({{df}}, x = '{{y}}', color = 'blue')\n\n# Combina os gráficos\nggarrange(p1, p2, ncol = 2, labels = c('A', 'B'))"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "W = 0.85, p-value = 0.004",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "CUIDADO! Aqui < 0.05 é 'ruim' para a normalidade. Indica que os dados NÃO são normais (violação)."
+        },
+        {
+          "termo": "W",
+          "significado": "Estatística de teste. Quanto mais próximo de 1, mais parecida com a curva normal perfeita."
+        }
+      ]
+    },
+    "graficos": "Histograma e QQ-Plot",
+    "report": "A normalidade da distribuição de [Variável] foi avaliada pelo teste de Shapiro-Wilk. Os resultados indicaram que os dados [seguem/não seguem] uma distribuição normal, W = [valor_W], p = [valor_p]. [Se p > 0.05: A suposição de normalidade foi atendida]. [Se p < 0.05: A suposição de normalidade foi violada, sugerindo o uso de testes não-paramétricos].",
+    "tags": [
+      "normalidade",
+      "distribuição",
+      "pressuposto"
+    ]
+  },
+  {
+    "titulo": "Correlação Linear de Pearson (r)",
+    "pivot_config": {
+      "allowed": false,
+      "default_cols": 0
+    },
+    "descricao": "É um coeficiente estatístico paramétrico que mede a força e a direção da relação linear entre duas variáveis quantitativas contínuas. O resultado é um índice adimensional 'r' que varia de -1 (correlação negativa perfeita) a +1 (correlação positiva perfeita), passando por 0 (ausência de correlação linear).",
+    "uso": "Indicado para quantificar o grau de associação entre duas variáveis. Difere da regressão pois não busca prever uma variável baseada na outra, apenas entender como elas variam juntas.",
+    "exemplo_pratico": "Verificar se existe relação entre Idade e Pressão Arterial Sistólica.",
+    "hipoteses": {
+      "nula": "H0: ρ = 0 (rho é igual a zero). Não existe correlação linear entre as variáveis na população.",
+      "alternativa": "H1: ρ ≠ 0. Existe uma correlação linear significativa (seja positiva ou negativa)."
+    },
+    "pressupostos": [
+      {
+        "nome": "Variáveis Quantitativas",
+        "descricao": "Ambas as variáveis devem ser numéricas (intervalares ou de razão).",
+        "violacao": "Se for Ordinal, use Spearman.",
+        "icone": "🔢"
+      },
+      {
+        "nome": "Normalidade Bivariada",
+        "descricao": "Ambas as variáveis devem seguir distribuição normal.",
+        "violacao": "Se falhar: Use Spearman.",
+        "icone": "🔔"
+      },
+      {
+        "nome": "Linearidade",
+        "descricao": "A relação deve ser uma linha reta.",
+        "violacao": "Se for curva (monotônica), use Spearman.",
+        "icone": "📏"
+      },
+      {
+        "nome": "Ausência de Outliers",
+        "descricao": "Pearson é extremamente sensível a valores extremos.",
+        "violacao": "Remova outliers ou use Spearman.",
+        "icone": "🚫"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Colunas Numéricas",
+      "descricao": "Duas colunas: 'var1' e 'var2'.",
+      "colunas": [
+        "ID",
+        "var1",
+        "var2"
+      ],
+      "exemplo": [
+        ["1", "45", "120"],
+        ["2", "60", "145"],
+        ["3", "35", "110"],
+        ["4", "55", "138"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(ggpubr)) install.packages('ggpubr')\nif(!require(rstatix)) install.packages('rstatix')\nlibrary(ggpubr); library(rstatix)\n\n# Requer duas variáveis numéricas: {{x}} e {{y}}"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Resumo das variáveis de interesse\n{{df}} %>% \n  select({{x}}, {{y}}) %>% \n  get_summary_stats(type = 'mean_sd')"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# Teste de normalidade para AMBAS as variáveis (Pré-requisito)\n# Se p < 0.05 em alguma, Pearson não é recomendado (Use Spearman)\nshapiro.test({{df}}${{x}})\nshapiro.test({{df}}${{y}})"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Teste de correlação de Pearson\nres_cor <- cor_test({{df}}, {{x}}, {{y}}, method = 'pearson')\n\nprint(res_cor)\n# Interpretar 'cor' (magnitude) e 'p' (significância)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Gráfico de Dispersão com coeficiente estatístico\nggplot({{df}}, aes(x = {{x}}, y = {{y}})) + \n  # Pontos representando cada observação\n  geom_point(size = 2, color = 'darkblue', alpha = 0.7) + \n  \n  # Linha de tendência linear\n  geom_smooth(method = 'lm', se = TRUE, color = 'red', linetype = 'dashed') + \n  \n  # Adiciona o coeficiente de correlação (R) e p-valor no topo\n  stat_cor(method = 'pearson', label.x.npc = 'center') + \n  \n  labs(\n    title = 'Correlação de Pearson',\n    subtitle = 'Associação Linear',\n    x = 'Variável X',\n    y = 'Variável Y'\n  ) + \n  \n  theme_classic()"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "t = 8.5, df = 28, p-value < 2.2e-16, cor = 0.85",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "Confirma que a correlação observada é estatisticamente significativa e não fruto do acaso."
+        },
+        {
+          "termo": "cor",
+          "significado": "Coeficiente 'r'. Indica força e direção: +1 (positiva perfeita), -1 (negativa perfeita), 0 (nenhuma)."
+        }
+      ]
+    },
+    "graficos": "Scatterplot",
+    "report": "Foi calculado um coeficiente de correlação produto-momento de Pearson para avaliar a relação linear entre [Variável 1] e [Variável 2]. Houve uma correlação [positiva/negativa] [fraca/moderada/forte] significativa entre as duas variáveis, r([N-2]) = [valor_r], p = [valor_p].",
+    "tags": [
+      "associação",
+      "linear",
+      "contínuo",
+      "paramétrico"
+    ]
+  },
+  {
+    "titulo": "Teste t Pareado (Amostras Dependentes)",
+    "pivot_config": {
+      "allowed": true,
+      "default_cols": 2
+    },
+    "descricao": "Teste estatístico paramétrico utilizado para comparar as médias de um mesmo grupo avaliado em dois momentos distintos (medidas repetidas) ou de pares de indivíduos intimamente relacionados. O teste foca na 'média das diferenças' entre os pares.",
+    "uso": "O padrão-ouro para experimentos do tipo 'Antes e Depois'. Serve para verificar se uma intervenção específica causou uma mudança significativa nos mesmos sujeitos.",
+    "exemplo_pratico": "Avaliar a dor (Escala VAS) nos mesmos pacientes ANTES e DEPOIS de tomar um analgésico.",
+    "hipoteses": {
+      "nula": "H0: A média das diferenças é igual a zero (μd = 0). Estatisticamente, a situação 'Antes' é igual à situação 'Depois'. A intervenção não teve efeito.",
+      "alternativa": "H1: A média das diferenças é diferente de zero (μd ≠ 0). Existe uma mudança significativa entre os dois momentos."
+    },
+    "pressupostos": [
+      {
+        "nome": "Dados Pareados",
+        "descricao": "Medidas devem vir do mesmo sujeito (Antes/Depois).",
+        "violacao": "Se forem grupos diferentes, use T-test Independente.",
+        "icone": "🔗"
+      },
+      {
+        "nome": "Normalidade das Diferenças",
+        "descricao": "A subtração (Pós - Pré) deve ser normal.",
+        "violacao": "Se falhar: Use Wilcoxon Signed-Rank.",
+        "icone": "🔔"
+      },
+      {
+        "nome": "Variável Contínua",
+        "descricao": "A medida deve ser numérica.",
+        "violacao": "Se for Ordinal, use Wilcoxon Signed-Rank.",
+        "icone": "🔢"
+      },
+      {
+        "nome": "Ausência de Outliers",
+        "descricao": "Valores extremos na mudança enviesam o resultado.",
+        "violacao": "Use Wilcoxon se houver outliers fortes.",
+        "icone": "🚫"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Longo com ID",
+      "descricao": "Colunas: 'id', 'tempo', 'y'.",
+      "colunas": [
+        "id",
+        "tempo",
+        "y"
+      ],
+      "exemplo": [
+        ["Sujeito 1", "Antes", "80.5"],
+        ["Sujeito 1", "Depois", "78.2"],
+        ["Sujeito 2", "Antes", "92.0"],
+        ["Sujeito 2", "Depois", "91.5"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(dplyr)) install.packages('dplyr')\nif(!require(rstatix)) install.packages('rstatix')\nif(!require(ggpubr)) install.packages('ggpubr')\nlibrary(dplyr); library(rstatix); library(ggpubr)\n\n# Variáveis: {{y}} (Medida), {{x}} (Tempo/Grupo Pareado)"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Estatísticas por condição (ex: Antes/Depois)\n{{df}} %>%\n  group_by({{x}}) %>%\n  get_summary_stats({{y}}, type = 'mean_sd')"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# A normalidade deve ser verificada na DIFERENÇA (d), não nos dados brutos\n# Calculando diferenças manualmente\ndiferencas <- {{df}} %>%\n  group_by(id) %>% # Agrupa por sujeito (ID padrão)\n  summarise(d = diff({{y}})) %>% # Calcula diferença de valor\n  pull(d)\n\n# Teste de Shapiro na diferença\nshapiro.test(diferencas)"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Teste t pareado (paired = TRUE)\nres_t <- t_test({{df}}, {{y}} ~ {{x}}, paired = TRUE, detailed = TRUE)\n\n# Tamanho de Efeito (Cohen's d para pareados)\nres_d <- cohens_d({{df}}, {{y}} ~ {{x}}, paired = TRUE)\n\nprint(res_t)\nprint(res_d)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Gráfico Pareado (Before-After Plot)\n# Conecta os pontos do mesmo sujeito para visualizar a mudança individual\nggpaired({{df}}, x = '{{x}}', y = '{{y}}', \n         color = '{{x}}', line.color = 'gray', line.size = 0.4,\n         palette = 'jco') + \n  \n  # Adiciona resultado estatístico automaticamente\n  stat_compare_means(method = 't.test', paired = TRUE, label.y.npc = 'top') + \n  \n  labs(\n    title = 'Comparação Pareada',\n    subtitle = 'Evolução individual entre condições',\n    y = 'Medida Avaliada'\n  ) + \n  \n  theme_pubr()"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "t = 5.4, df = 29, p-value = 0.00001",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "Se < 0.05, indica uma mudança estatisticamente significativa entre o momento 'Antes' e 'Depois'."
+        },
+        {
+          "termo": "t",
+          "significado": "Estatística t. Indica a magnitude da mudança padronizada pelo erro padrão."
+        }
+      ]
+    },
+    "graficos": "Paired Boxplot ou Spaghetti Plot",
+    "report": "Um teste t para amostras pareadas foi conduzido para comparar [Variável] na condição [Tempo 1] e [Tempo 2]. Houve uma diferença significativa nos escores de [Tempo 1] (M = [Média], DP = [Desvio]) e [Tempo 2] (M = [Média], DP = [Desvio]); t([graus_liberdade]) = [valor_t], p = [valor_p]. O tamanho de efeito foi d = [valor_d].",
+    "tags": [
+      "comparação de médias",
+      "paramétrico",
+      "pareado"
+    ]
+  },
+  {
+    "titulo": "Teste de Mann-Whitney U (Soma de Postos de Wilcoxon)",
+    "pivot_config": {
+      "allowed": true,
+      "default_cols": 2
+    },
+    "descricao": "É o equivalente não-paramétrico ao Teste t para amostras independentes. Ele não usa os valores brutos dos dados (médias), mas sim a ordem deles (ranking/postos). Ele testa se uma amostra tem valores estocasticamente maiores que a outra.",
+    "uso": "Obrigatório quando: 1) Os dados não seguem distribuição normal; 2) A amostra é muito pequena; 3) Existem outliers significativos; ou 4) A variável é qualitativa ordinal (ex: escalas de Likert, rankings).",
+    "exemplo_pratico": "Comparar o nível de satisfação (Escala 1-5) entre clientes de duas lojas diferentes.",
+    "hipoteses": {
+      "nula": "H0: As distribuições dos dois grupos são idênticas. A probabilidade de uma observação aleatória do grupo A ser maior que a do grupo B é de 50%.",
+      "alternativa": "H1: As distribuições são diferentes. Um grupo tende a apresentar valores (postos) mais altos que o outro."
+    },
+    "pressupostos": [
+      {
+        "nome": "Independência",
+        "descricao": "Observações devem ser independentes (grupos distintos).",
+        "violacao": "Se for pareado, use Wilcoxon Signed-Rank.",
+        "icone": "🎲"
+      },
+      {
+        "nome": "Ordinal ou Superior",
+        "descricao": "Variável deve permitir ordenação (Ranking).",
+        "violacao": "Teste inválido para nominais puras (use Qui-Quadrado).",
+        "icone": "📊"
+      },
+      {
+        "nome": "Similaridade de Forma",
+        "descricao": "Se as distribuições forem parecidas, o teste compara medianas.",
+        "violacao": "Se formatos forem diferentes, conclua sobre 'Postos Médios' e não Medianas.",
+        "icone": "〰️"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Longo (Tidy Format)",
+      "descricao": "Uma coluna numérica 'y' e uma coluna de grupo 'grupo'.",
+      "colunas": [
+        "ID",
+        "grupo",
+        "y"
+      ],
+      "exemplo": [
+        ["1", "Controle", "12.5"],
+        ["2", "Controle", "11.8"],
+        ["3", "Tratamento", "15.2"],
+        ["4", "Tratamento", "16.1"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(rstatix)) install.packages('rstatix')\nif(!require(ggpubr)) install.packages('ggpubr')\nlibrary(rstatix); library(ggpubr)\n\n# Variável {{y}} (Numérica/Ordinal), {{x}} (Grupo)"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Para não-paramétricos, a medida central é a MEDIANA e a dispersão é o IQR\n{{df}} %>%\n  group_by({{x}}) %>%\n  get_summary_stats({{y}}, type = 'median_iqr')"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# Verificamos normalidade para confirmar que o teste t NÃO seria adequado\n# Se p < 0.05, a distribuição não é normal -> Justifica Mann-Whitney\n{{df}} %>% group_by({{x}}) %>% shapiro_test({{y}})"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Teste U de Mann-Whitney (Wilcoxon Rank Sum Test)\nres_u <- wilcox_test({{df}}, {{y}} ~ {{x}})\n\n# Tamanho de Efeito (r de Wilcoxon)\n# 0.1=Pequeno, 0.3=Médio, 0.5=Grande\nres_eff <- wilcox_effsize({{df}}, {{y}} ~ {{x}})\n\nprint(res_u)\nprint(res_eff)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Boxplot é ideal para dados não-normais (mostra mediana e quartis)\nggplot({{df}}, aes(x = {{x}}, y = {{y}}, fill = {{x}})) + \n  # Caixa sem notch (padrão)\n  geom_boxplot(alpha = 0.6) + \n  \n  # Adiciona pontos individuais para mostrar distribuição\n  geom_jitter(width = 0.15, size = 1.5, alpha = 0.6) + \n  \n  # Rótulos\n  labs(\n    title = 'Teste de Mann-Whitney',\n    subtitle = 'Comparação de Medianas/Postos',\n    y = 'Valor (Escala/Ordinal)',\n    x = 'Grupo'\n  ) + \n  \n  theme_classic() + \n  theme(legend.position = 'none')"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "W = 156.5, p-value = 0.032",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "Se < 0.05, os postos (ranking) de um grupo são significativamente diferentes do outro (um grupo tende a ter valores maiores)."
+        },
+        {
+          "termo": "W",
+          "significado": "Estatística da soma de postos. Valor base para o cálculo não-paramétrico."
+        }
+      ]
+    },
+    "graficos": "Boxplot",
+    "report": "Um teste U de Mann-Whitney foi realizado para determinar se havia diferenças nas pontuações de [Variável] entre [Grupo A] e [Grupo B]. As distribuições nos dois grupos diferiram significativamente (Mann-Whitney U = [valor_U], p = [valor_p] bicaudal). A mediana das pontuações para o [Grupo A] (Mdn = [valor]) foi estatisticamente diferente da do [Grupo B] (Mdn = [valor]), com um tamanho de efeito r = [valor_r].",
+    "tags": [
+      "não-paramétrico",
+      "comparação de grupos",
+      "dois grupos"
+    ]
+  },
+  {
+    "titulo": "Teste de Kruskal-Wallis (ANOVA Unidirecional em Postos)",
+    "pivot_config": {
+      "allowed": true,
+      "default_cols": 3
+    },
+    "descricao": "É a extensão não-paramétrica da ANOVA de uma via para comparar três ou mais grupos independentes. Em vez de comparar médias (que são sensíveis a outliers), ele converte os dados em um ranking geral e compara os 'postos médios' (mean ranks) de cada grupo.",
+    "uso": "Utilizado quando os pressupostos da ANOVA (normalidade e homogeneidade de variâncias) são violados, ou quando a variável dependente é puramente ordinal (ex: escalas de satisfação, estágios de doença).",
+    "exemplo_pratico": "Comparar escores de dor (0-10) entre três tratamentos diferentes.",
+    "hipoteses": {
+      "nula": "H0: As populações de onde vêm as amostras têm a mesma distribuição (os postos médios são iguais).",
+      "alternativa": "H1: Pelo menos uma das amostras domina estocasticamente a outra (tende a apresentar valores maiores). Em termos simples: pelo menos um grupo é diferente dos demais."
+    },
+    "pressupostos": [
+      {
+        "nome": "Independência",
+        "descricao": "Grupos devem ser mutuamente exclusivos.",
+        "violacao": "Se houver dependência, use Friedman Test.",
+        "icone": "🎲"
+      },
+      {
+        "nome": "Variável Ordinal",
+        "descricao": "Deve permitir ordenação (Rank).",
+        "violacao": "Teste inválido para nominais (use Qui-Quadrado).",
+        "icone": "📊"
+      },
+      {
+        "nome": "Formato das Distribuições",
+        "descricao": "Para concluir sobre diferença de MEDIANAS, os formatos devem ser similares.",
+        "violacao": "Se formatos diferentes, conclua apenas sobre 'Postos Médios'.",
+        "icone": "〰️"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Longo (Tidy Format)",
+      "descricao": "Uma coluna numérica 'y' e uma coluna de grupo 'grupo'.",
+      "colunas": [
+        "ID",
+        "grupo",
+        "y"
+      ],
+      "exemplo": [
+        ["1", "Controle", "12.5"],
+        ["2", "Controle", "11.8"],
+        ["3", "TratamentoA", "15.2"],
+        ["4", "TratamentoB", "16.1"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(rstatix)) install.packages('rstatix')\nif(!require(ggpubr)) install.packages('ggpubr')\nlibrary(rstatix); library(ggpubr)\n\n# Variável {{y}} (Ordinal/Numérica), {{x}} (3+ Grupos)"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Mediana e Amplitude Interquartil (IQR) por grupo\n{{df}} %>%\n  group_by({{x}}) %>%\n  get_summary_stats({{y}}, type = 'median_iqr')"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# Teste de Levene (opcional para Kruskal)\n# Se heterogêneo (p<0.05), Kruskal ainda é preferível à ANOVA padrão\nlevene_test({{df}}, {{y}} ~ {{x}})"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Teste de Kruskal-Wallis\nres_k <- kruskal_test({{df}}, {{y}} ~ {{x}})\n\n# Tamanho de efeito (Eta squared)\nres_eff <- kruskal_effsize({{df}}, {{y}} ~ {{x}})\n\n# Post-hoc de Dunn (Comparações Múltiplas) com correção de FDR\nres_dunn <- dunn_test({{df}}, {{y}} ~ {{x}}, p.adjust.method = 'fdr')\n\nprint(res_k)\nprint(res_eff)\nprint(res_dunn)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Violin plot com Boxplot interno\n# Combina densidade da distribuição com resumo estatístico (mediana)\nggplot({{df}}, aes(x = {{x}}, y = {{y}}, fill = {{x}})) + \n  # Violin para ver a forma da distribuição\n  geom_violin(alpha = 0.5, trim = FALSE) + \n  \n  # Boxplot estreito dentro para ver a mediana exata\n  geom_boxplot(width = 0.1, fill = 'white', color = 'black') + \n  \n  labs(\n    title = 'Kruskal-Wallis',\n    subtitle = 'Distribuição de Postos por Grupo',\n    x = 'Grupos',\n    y = 'Postos/Valores'\n  ) + \n  \n  theme_dark() + \n  theme(legend.position = 'none')"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "Kruskal-Wallis chi-squared = 15.3, df = 2, p-value = 0.00047",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "Se < 0.05, indica que a distribuição de postos é diferente entre os grupos comparados."
+        },
+        {
+          "termo": "chi-squared",
+          "significado": "Estatística H do teste (aproximada pela distribuição Qui-quadrado)."
+        }
+      ]
+    },
+    "graficos": "Violin Plot",
+    "report": "Um teste de Kruskal-Wallis foi conduzido para comparar as diferenças entre os grupos [G1], [G2] e [G3] na variável [Dependente]. O teste revelou uma diferença estatisticamente significativa entre os grupos, H([graus_liberdade]) = [valor_H], p = [valor_p], η² = [valor_eta]. A análise post-hoc de Dunn com correção FDR revelou que [descrever pares com diferença significativa].",
+    "tags": [
+      "não-paramétrico",
+      "comparação de grupos",
+      "muitos grupos"
+    ]
+  },
+  {
+    "titulo": "Correlação de Postos de Spearman (Spearman's Rho)",
+    "pivot_config": {
+      "allowed": false,
+      "default_cols": 0
+    },
+    "descricao": "É uma medida não-paramétrica de correlação estatística que avalia a força e a direção da associação entre duas variáveis classificadas (rankeadas). Ao contrário de Pearson, ele não usa os valores brutos, mas sim a ordem deles.",
+    "uso": "A alternativa correta ao Pearson quando: 1) Os dados não seguem distribuição normal; 2) A variável é ordinal (ex: Escolaridade, Estágio de Doença); ou 3) A relação não é estritamente linear, mas é monotônica.",
+    "exemplo_pratico": "Correlacionar a ordem de chegada em uma corrida com o VO2 max dos atletas.",
+    "hipoteses": {
+      "nula": "H0: ρ = 0 (rho é zero). Não existe associação monotônica entre as variáveis. Quando uma variável aumenta, a outra não apresenta tendência sistemática de subir ou descer.",
+      "alternativa": "H1: ρ ≠ 0. Existe uma associação monotônica significativa."
+    },
+    "pressupostos": [
+      {
+        "nome": "Ordinal ou Superior",
+        "descricao": "Variáveis devem ser no mínimo ordinais.",
+        "violacao": "Se nominais, use Qui-Quadrado ou V de Cramer.",
+        "icone": "📊"
+      },
+      {
+        "nome": "Relação Monotônica",
+        "descricao": "Quando X sobe, Y deve tender a subir (ou descer) constantemente.",
+        "violacao": "Se a relação for em forma de U, a correlação será enganosamente baixa.",
+        "icone": "📈"
+      },
+      {
+        "nome": "Observações Pareadas",
+        "descricao": "Dados devem vir dos mesmos sujeitos.",
+        "violacao": "N/A",
+        "icone": "🔗"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Colunas Numéricas",
+      "descricao": "Duas colunas numéricas: 'var1' e 'var2'.",
+      "colunas": [
+        "ID",
+        "var1",
+        "var2"
+      ],
+      "exemplo": [
+        ["1", "45", "120"],
+        ["2", "60", "145"],
+        ["3", "35", "110"],
+        ["4", "55", "138"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(ggpubr)) install.packages('ggpubr')\nif(!require(rstatix)) install.packages('rstatix')\nlibrary(ggpubr); library(rstatix)\n\n# Duas variáveis: {{x}} e {{y}}"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Resumo descritivo simples\nsummary({{df}}[c('{{x}}', '{{y}}')])"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# Checagem de Normalidade (para rejeitar Pearson e confirmar Spearman)\n# Se p < 0.05, a distribuição não é normal -> Justifica Spearman\nshapiro.test({{df}}${{x}})\nshapiro.test({{df}}${{y}})"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Correlação de Spearman (method = 'spearman')\nres_cor <- cor_test({{df}}, {{x}}, {{y}}, method = 'spearman')\n\nprint(res_cor)\n# rho = força da correlação (-1 a 1)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Scatterplot com curva LOESS\n# LOESS desenha uma curva suave que se adapta aos dados, ideal para ver monotonicidade\nggplot({{df}}, aes(x = {{x}}, y = {{y}})) + \n  geom_point(color = 'purple', alpha = 0.7, size = 2) + \n  \n  # Linha de suavização local (não linear)\n  geom_smooth(method = 'loess', se = TRUE, color = 'black', linetype = 'solid') + \n  \n  # Adiciona coeficiente no gráfico\n  stat_cor(method = 'spearman', label.x.npc = 'center') + \n  \n  labs(\n    title = 'Correlação de Spearman',\n    subtitle = 'Associação Monotônica (Ranking)',\n    x = 'Variável X',\n    y = 'Variável Y'\n  ) + \n  \n  theme_minimal()"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "S = 2400, p-value < 0.01, rho = -0.70",
+      "destaques": [
+        {
+          "termo": "rho",
+          "significado": "Coeficiente de Spearman. Indica força da associação monotônica (-1 a +1)."
+        },
+        {
+          "termo": "p-value",
+          "significado": "Confirma a significância estatística da associação."
+        }
+      ]
+    },
+    "graficos": "Scatterplot com Loess",
+    "report": "Foi realizada uma correlação de ordem de postos de Spearman para avaliar a relação monotônica entre [Variável 1] e [Variável 2]. Houve uma correlação [positiva/negativa] estatisticamente significativa entre as duas variáveis, rs([N-2]) = [valor_rho], p = [valor_p].",
+    "tags": [
+      "associação",
+      "não-paramétrico",
+      "correlação"
+    ]
+  },
+  {
+    "titulo": "Teste de Postos com Sinais de Wilcoxon (Wilcoxon Signed-Rank Test)",
+    "pivot_config": {
+      "allowed": true,
+      "default_cols": 2
+    },
+    "descricao": "É o equivalente não-paramétrico ao Teste t Pareado. Ele é utilizado para comparar duas medições relacionadas (mesma amostra) quando a distribuição das diferenças entre os pares não segue a normalidade. Ele avalia tanto a direção (sinal) quanto a magnitude relativa (posto) das diferenças.",
+    "uso": "Indicado para estudos 'Antes e Depois' ou pares casados (ex: gêmeos, olho esquerdo vs direito) onde os dados são ordinais ou contínuos assimétricos.",
+    "exemplo_pratico": "Comparar o nível de ansiedade (Escala Ordinal) antes e depois de uma sessão de meditação nos mesmos pacientes.",
+    "hipoteses": {
+      "nula": "H0: A mediana das diferenças entre os pares é zero. A distribuição das diferenças é simétrica em torno de zero (não há tendência de melhora ou piora).",
+      "alternativa": "H1: A mediana das diferenças é diferente de zero. Existe uma mudança sistemática entre as duas condições."
+    },
+    "pressupostos": [
+      {
+        "nome": "Dados Pareados",
+        "descricao": "As duas medidas devem vir do mesmo sujeito.",
+        "violacao": "Se independentes, use Mann-Whitney.",
+        "icone": "🔗"
+      },
+      {
+        "nome": "Ordinal ou Quantitativa",
+        "descricao": "Dados devem permitir ordenação.",
+        "violacao": "N/A",
+        "icone": "📊"
+      },
+      {
+        "nome": "Independência dos Pares",
+        "descricao": "Um sujeito não deve influenciar o outro.",
+        "violacao": "Revise o desenho experimental.",
+        "icone": "🎲"
+      },
+      {
+        "nome": "Simetria da Diferença",
+        "descricao": "Para concluir sobre MEDIANA, a distribuição da diferença deve ser simétrica.",
+        "violacao": "Se assimétrica, conclua apenas que a distribuição mudou.",
+        "icone": "🪞"
+      }
+    ],
+    "formato_dados": {
+      "tipo": "Longo",
+      "descricao": "Colunas: 'id', 'tempo', 'valor'.",
+      "colunas": [
+        "id",
+        "tempo",
+        "valor"
+      ],
+      "exemplo": [
+        ["1", "Antes", "10"],
+        ["1", "Depois", "8"],
+        ["2", "Antes", "12"],
+        ["2", "Depois", "11"]
+      ]
+    },
+    "etapas_r": [
+      {
+        "titulo": "1. Preparação e Pacotes",
+        "codigo": "if(!require(rstatix)) install.packages('rstatix')\nif(!require(ggpubr)) install.packages('ggpubr')\nlibrary(rstatix); library(ggpubr)\n\n# Variável {{y}} (Numérica/Ordinal), {{x}} (Tempo/Condição)"
+      },
+      {
+        "titulo": "2. Medidas Descritivas",
+        "codigo": "# Mediana e IQR por grupo\n{{df}} %>%\n  group_by({{x}}) %>%\n  get_summary_stats({{y}}, type = 'median_iqr')"
+      },
+      {
+        "titulo": "3. Avaliação dos Pressupostos",
+        "codigo": "# Verifica se as diferenças NÃO são normais\n# Calculamos a diferença entre pares\ndiferencas <- {{df}} %>%\n  group_by(id) %>%\n  summarise(d = diff({{y}})) %>%\n  pull(d)\n\n# Se p < 0.05, não é normal -> Justifica Wilcoxon em vez de t-Pareado\nshapiro.test(diferencas)"
+      },
+      {
+        "titulo": "4. Execução do Teste",
+        "codigo": "# Teste de Wilcoxon Pareado (paired = TRUE)\nres <- wilcox_test({{df}}, {{y}} ~ {{x}}, paired = TRUE)\n\n# Tamanho de Efeito (r)\neff <- wilcox_effsize({{df}}, {{y}} ~ {{x}}, paired = TRUE)\n\nprint(res)\nprint(eff)"
+      },
+      {
+        "titulo": "5. Visualização Profissional",
+        "codigo": "# Gráfico Pareado (Visualiza a mudança de cada sujeito)\nggpaired({{df}}, x = '{{x}}', y = '{{y}}', \n         fill = '{{x}}', line.color = 'gray') + \n  \n  labs(\n    title = 'Wilcoxon Signed-Rank',\n    subtitle = 'Mudança entre condições (Antes vs Depois)',\n    y = 'Valor'\n  ) + \n  \n  theme_pubclean() + \n  theme(legend.position = 'none')"
+      }
+    ],
+    "saida_exemplo": {
+      "texto": "V = 450, p-value = 0.021",
+      "destaques": [
+        {
+          "termo": "p-value",
+          "significado": "Se < 0.05, a mediana das diferenças não é zero (houve mudança significativa)."
+        },
+        {
+          "termo": "V",
+          "significado": "Estatística V de Wilcoxon. Soma dos postos positivos."
+        }
+      ]
+    },
+    "graficos": "Paired Boxplot",
+    "report": "Um teste de postos com sinais de Wilcoxon indicou que as pontuações de [Pós-teste] (Mdn = [Mediana]) foram estatisticamente [maiores/menores] do que as pontuações de [Pré-teste] (Mdn = [Mediana]), Z = [valor_Z], p = [valor_p]. O tamanho de efeito foi r = [valor_r].",
+    "tags": [
+      "não-paramétrico",
+      "pareado"
+    ]
+  }
+]
