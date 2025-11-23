@@ -9,8 +9,8 @@
     "uso": "Indicado quando a variável dependente é numérica (quantitativa) e a variável independente é categórica com dois níveis (dois grupos distintos, ex: Placebo vs Tratamento).",
     "exemplo_pratico": "Comparar a eficácia de dois métodos de ensino diferentes: O Grupo A usa o Método Tradicional e o Grupo B usa o Método Inovador. O teste t verificará se a nota média final difere significativamente entre os dois grupos.",
     "hipoteses": {
-      "nula": "H0: Não há diferença real entre as médias das populações dos dois grupos (μ1 = μ2). Qualquer diferença observada na amostra é fruto do acaso.",
-      "alternativa": "H1: Existe uma diferença real entre as médias das populações dos dois grupos (μ1 ≠ μ2)."
+      "nula": "H0: Não há diferença real entre as médias das populações dos dois grupos (μ1 = μ2)",
+      "alternativa": "H1: Existe uma diferença real entre as médias dos dois grupos (μ1 ≠ μ2)."
     },
     "pressupostos": [
       {
@@ -107,7 +107,7 @@
     "uso": "Indicado quando você possui uma variável numérica e uma variável categórica com 3 ou mais níveis. É crucial para evitar o aumento do erro tipo I que ocorreria ao realizar múltiplos testes t separados.",
     "exemplo_pratico": "Comparar a eficácia de três dietas diferentes (Dieta A, Dieta B, Dieta C) na perda de peso após 3 meses.",
     "hipoteses": {
-      "nula": "H0: Todas as médias populacionais dos grupos são estatisticamente iguais (μ1 = μ2 = μ3 = ... = μk).",
+      "nula": "H0: Todas as médias dos grupos são estatisticamente iguais (μ1 = μ2 = μ3 = ... = μk).",
       "alternativa": "H1: Pelo menos uma das médias difere das demais. Atenção: O teste global não diz *qual* grupo é diferente, apenas que *existe* uma diferença."
     },
     "pressupostos": [
@@ -668,8 +668,8 @@
     "uso": "Obrigatório quando: 1) Os dados não seguem distribuição normal; 2) A amostra é muito pequena; 3) Existem outliers significativos; ou 4) A variável é qualitativa ordinal (ex: escalas de Likert, rankings).",
     "exemplo_pratico": "Comparar o nível de satisfação (Escala 1-5) entre clientes de duas lojas diferentes.",
     "hipoteses": {
-      "nula": "H0: As distribuições dos dois grupos são idênticas. A probabilidade de uma observação aleatória do grupo A ser maior que a do grupo B é de 50%.",
-      "alternativa": "H1: As distribuições são diferentes. Um grupo tende a apresentar valores (postos) mais altos que o outro."
+      "nula": "H0: As distribuições/medianas dos dois grupos são idênticas.",
+      "alternativa": "H1: As distribuições/medianas são diferentes. Um grupo tende a apresentar valores (postos) mais altos que o outro."
     },
     "pressupostos": [
       {
@@ -759,8 +759,8 @@
     "uso": "Utilizado quando os pressupostos da ANOVA (normalidade e homogeneidade de variâncias) são violados, ou quando a variável dependente é puramente ordinal (ex: escalas de satisfação, estágios de doença).",
     "exemplo_pratico": "Comparar escores de dor (0-10) entre três tratamentos diferentes.",
     "hipoteses": {
-      "nula": "H0: As populações de onde vêm as amostras têm a mesma distribuição (os postos médios são iguais).",
-      "alternativa": "H1: Pelo menos uma das amostras domina estocasticamente a outra (tende a apresentar valores maiores). Em termos simples: pelo menos um grupo é diferente dos demais."
+      "nula": "H0: Os grupos de onde vêm as amostras têm a mesma distribuição (os postos médios são iguais).",
+      "alternativa": "H1: Pelo menos um dos grupos domina estocasticamente a outra (tende a apresentar valores maiores). Em termos simples: pelo menos um grupo é diferente dos demais."
     },
     "pressupostos": [
       {
