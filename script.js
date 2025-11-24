@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
         accordion.className = "accordion-wrapper";
         const accHeader = document.createElement("div");
         accHeader.className = "accordion-header active"; 
-        accHeader.innerHTML = `<h4>📊 Tabela de Dados (Edite para testar)</h4><span>▼</span>`;
+        accHeader.innerHTML = `<h4>📊 Tabela de Dados (Edite os nomes e variáveis abaixo)</h4><span>▼</span>`;
         const accContent = document.createElement("div");
         accContent.className = "accordion-content open";
         
@@ -518,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
         accordion.className = "accordion-wrapper";
         const accHeader = document.createElement("div");
         accHeader.className = "accordion-header active"; 
-        accHeader.innerHTML = `<h4>📊 Tabela de Exemplo (Edite os nomes aqui)</h4><span>▼</span>`;
+        accHeader.innerHTML = `<h4>📊 Tabela de Exemplo (Edite os nomes e variáveis abaixo)</h4><span>▼</span>`;
         const accContent = document.createElement("div");
         accContent.className = "accordion-content open";
         accHeader.onclick = () => {
